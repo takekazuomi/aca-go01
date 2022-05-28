@@ -3,12 +3,12 @@ name: Trigger auto deployment for goweb01
 # When this action will be executed
 on:
   # Automatically trigger it when detected changes in repo
-#   push:
-#     branches: 
-#       [ main ]
-#     paths:
-#     - '**'
-#     - '.github/workflows/deploy.yml'
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/deploy-bicep.yml'
 
   # Allow mannually trigger 
   workflow_dispatch:      
@@ -16,6 +16,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      container_image: ${{ steps.build.outputs.container_image}}
 
     steps:
       - uses: actions/setup-go@v2
@@ -34,13 +36,8 @@ jobs:
         run: echo $VERSION
 
       - name: build
-        run: ko publish ./ > url.log
-
-      - name: Upload url file
-        uses: actions/upload-artifact@v3
-        with:
-          name: url-log-file
-          path: url.log
+        id: build
+        run: echo "::set-output name=container_image::$(ko publish .)"
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,11 +59,16 @@ jobs:
         with:
           name: url-log-file
 
+# Deploy Bicep file
       - name: Deploy to containerapp
-        uses: azure/CLI@v1
+        uses: azure/arm-deploy@v1
         with:
-          inlineScript: |
-            url=$(cat url.log)
-            az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp registry set -n goweb01 -g omi31-rg --server ghcr.io --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }}
-            az containerapp update -n goweb01 -g omi31-rg --image ${url}
+            subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+            resourceGroupName: ${{ secrets.AZURE_RESOUCE_GROUP }}
+            template: ./deploy/main.bicep
+            parameters: >-
+                containerAppName=${{ CONTAINERAPPS_NAME }}
+                environmentName=${{ ENVIRONMENT_NAME }}
+                containerImage=${{ needs.build.outputs.container_image }}
+                containerPort=8080
+            failOnStdErr: false

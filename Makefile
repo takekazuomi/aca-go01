@@ -52,6 +52,7 @@ tmp/.env:
 	@echo "AZURE_CLIENT_ID=$$(az ad app list --query '[?displayName == `$(SP_NAME)`].appId' -o tsv)" > tmp/.env
 	@echo "AZURE_TENANT_ID=$(TENANT_ID)" >> tmp/.env
 	@echo "AZURE_SUBSCRIPTION_ID=$(SUBSCRIPTION_ID)" >> tmp/.env
+	@echo "AZURE_RESOUCE_GROUP=$(RESOURCE_GROUP)" >> tmp/.env
 	@echo "REGISTRY_USERNAME=$(REPO_USER)" >> tmp/.env
 	@echo "REGISTRY_PASSWORD=${GH_PAT}" >> tmp/.env
 
