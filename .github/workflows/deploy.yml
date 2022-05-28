@@ -1,0 +1,72 @@
+name: Trigger auto deployment for goweb01
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/deploy.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+    
+      - uses: imjasonh/setup-ko@v0.4
+
+      - name: Set env
+        run: echo "VERSION=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Test
+        run: echo $VERSION
+
+      - name: build
+        run: ko publish ./ > url.log
+
+      - name: Upload url file
+        uses: actions/upload-artifact@v3
+        with:
+          name: url-log-file
+          path: url.log
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+     
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}          
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: url-log-file
+
+      - name: Deploy to containerapp
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            url=$(cat url.log)
+            az config set extension.use_dynamic_install=yes_without_prompt
+            az containerapp registry set -n goweb01 -g omi31-rg --server ghcr.io --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }}
+            az containerapp update -n goweb01 -g omi31-rg --image ${url}

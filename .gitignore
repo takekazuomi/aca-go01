@@ -1,0 +1,4 @@
+.envrc.local
+tmp/
+.vscode
+bin/
