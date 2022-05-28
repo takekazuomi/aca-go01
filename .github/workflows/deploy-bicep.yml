@@ -58,6 +58,8 @@ jobs:
         run: |
             pwd
             ls -lR
+            ls -lR ../
+            env
 
       - name: Deploy to containerapp
         uses: azure/arm-deploy@v1
