@@ -60,10 +60,11 @@ jobs:
       - name: test
         run: |
             pwd
-            ls -lR
-            ls -lR ../
-            env
             echo "${{ needs.build.outputs.container_image }}"
+            ls -lR
+            ls -l ../
+            ls -l ../../
+            env
 
       - name: Deploy to containerapp
         uses: azure/arm-deploy@v1
