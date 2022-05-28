@@ -1,4 +1,5 @@
-REPO_USER		?= <OVERWRITE HERE>
+REPOSITORY_USER		?= <OVERWRITE HERE>
+REPOSITORY_SERVER	?= <OVERWRITE HERE>
 REPOSITORY_NAME		?= <OVERWRITE HERE>
 RESOURCE_GROUP		?= <OVERWRITE HERE>
 CONTAINERAPPS_NAME	?= <OVERWRITE HERE>
@@ -11,14 +12,14 @@ SP_NAME			?= $(RESOURCE_GROUP)-sp
 
 
 
-export KO_DOCKER_REPO=ghcr.io/$(REPO_USER)/aca-goaca01
+export KO_DOCKER_REPO=$(REPOSITORY_SERVER)/$(REPOSITORY_USER)/$(REPOSITORY_NAME)
 export VERSION=$(git rev-parse --short HEAD)
 
 help:			## Show this help.
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
 
 login:			## login github registory
-	echo $${GH_PAT} | docker login ghcr.io -u $(REPO_USER) --password-stdin
+	echo $${GH_PAT} | docker login ghcr.io -u $(REPOSITORY_USER) --password-stdin
 
 build:			## build 
 	ko build .
@@ -30,9 +31,9 @@ create-sp:		## create service principal for GitHub Action
 	&& echo "oid: $${OID}" \
 	&& az rest --method POST --uri "https://graph.microsoft.com/beta/applications/$${OID}/federatedIdentityCredentials" \
 		--body "{ \
-				'name':'$(RESOURCE_GROUP)-$(REPO_USER)-$(REPOSITORY_NAME)-cred', \
+				'name':'$(RESOURCE_GROUP)-$(REPOSITORY_USER)-$(REPOSITORY_NAME)-cred', \
 				'issuer':'https://token.actions.githubusercontent.com', \
-				'subject':'repo:$(REPO_USER)/$(REPOSITORY_NAME):ref:refs/heads/$(BRANCH_NAME)', \
+				'subject':'repo:$(REPOSITORY_USER)/$(REPOSITORY_NAME):ref:refs/heads/$(BRANCH_NAME)', \
 				'description':'GitHub Actions for $(RESOURCE_GROUP)', \
 				'audiences':['api://AzureADTokenExchange'] \
 			}"
@@ -53,7 +54,8 @@ tmp/.env:
 	@echo "AZURE_TENANT_ID=$(TENANT_ID)" >> tmp/.env
 	@echo "AZURE_SUBSCRIPTION_ID=$(SUBSCRIPTION_ID)" >> tmp/.env
 	@echo "AZURE_RESOUCE_GROUP=$(RESOURCE_GROUP)" >> tmp/.env
-	@echo "REGISTRY_USERNAME=$(REPO_USER)" >> tmp/.env
+	@echo "REPOSITORY_SERVER=$(REPOSITORY_SERVER)" >> tmp/.env
+	@echo "REGISTRY_USERNAME=$(REPOSITORY_USER)" >> tmp/.env
 	@echo "REGISTRY_PASSWORD=${GH_PAT}" >> tmp/.env
 	@echo "ENVIRONMENT_NAME=$(ENVIRONMENT_NAME)" >> tmp/.env
 	@echo "CONTAINERAPPS_NAME=$(CONTAINERAPPS_NAME)" >> tmp/.env
@@ -63,6 +65,9 @@ deploy-apps:		## deploy app
 	-p \
 	containerAppName=$(CONTAINERAPPS_NAME) \
 	environmentName=$(ENVIRONMENT_NAME) \
+	containerRegistry=$(REPOSITORY_SERVER) \
+	containerRegistryUsername=$(REPOSITORY_USER) \
+	containerRegistryPassword=$${GH_PAT} \
 	containerImage=$$(ko build .) \
 	containerPort=8080
 

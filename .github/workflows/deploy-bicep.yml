@@ -63,6 +63,7 @@ jobs:
             ls -lR
             ls -lR ../
             env
+            echo "${{ needs.build.outputs.container_image }}"
 
       - name: Deploy to containerapp
         uses: azure/arm-deploy@v1
@@ -75,4 +76,7 @@ jobs:
                 environmentName=${{ secrets.ENVIRONMENT_NAME }}
                 containerImage=${{ needs.build.outputs.container_image }}
                 containerPort=8080
+                containerRegistry=${{ secrets.REPOSITORY_SERVER }}
+	            containerRegistryUsername=${{ secrets.REPOSITORY_USER }}
+            	containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
             failOnStdErr: false
