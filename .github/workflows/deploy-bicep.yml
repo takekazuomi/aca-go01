@@ -59,7 +59,7 @@ jobs:
         with:
             subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
             resourceGroupName: ${{ secrets.AZURE_RESOUCE_GROUP }}
-            template: ./deploy/main.bicep
+            template: ../deploy/main.bicep
             parameters: >-
                 containerAppName=${{ secrets.CONTAINERAPPS_NAME }}
                 environmentName=${{ secrets.ENVIRONMENT_NAME }}
