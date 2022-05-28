@@ -55,6 +55,8 @@ tmp/.env:
 	@echo "AZURE_RESOUCE_GROUP=$(RESOURCE_GROUP)" >> tmp/.env
 	@echo "REGISTRY_USERNAME=$(REPO_USER)" >> tmp/.env
 	@echo "REGISTRY_PASSWORD=${GH_PAT}" >> tmp/.env
+	@echo "ENVIRONMENT_NAME=$(ENVIRONMENT_NAME)" >> tmp/.env
+	@echo "CONTAINERAPPS_NAME=$(CONTAINERAPPS_NAME)" >> tmp/.env
 
 deploy-apps:		## deploy app
 	az deployment group create -g $(RESOURCE_GROUP) -f ./deploy/main.bicep \

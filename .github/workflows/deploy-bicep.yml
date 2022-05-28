@@ -67,8 +67,8 @@ jobs:
             resourceGroupName: ${{ secrets.AZURE_RESOUCE_GROUP }}
             template: ./deploy/main.bicep
             parameters: >-
-                containerAppName=${{ CONTAINERAPPS_NAME }}
-                environmentName=${{ ENVIRONMENT_NAME }}
+                containerAppName=${{ secrets.CONTAINERAPPS_NAME }}
+                environmentName=${{ secrets.ENVIRONMENT_NAME }}
                 containerImage=${{ needs.build.outputs.container_image }}
                 containerPort=8080
             failOnStdErr: false
