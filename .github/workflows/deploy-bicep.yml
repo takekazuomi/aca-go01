@@ -78,6 +78,6 @@ jobs:
                 containerImage=${{ needs.build.outputs.container_image }}
                 containerPort=8080
                 containerRegistry=${{ secrets.REPOSITORY_SERVER }}
-	            containerRegistryUsername=${{ secrets.REPOSITORY_USER }}
-            	containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
+                containerRegistryUsername=${{ secrets.REPOSITORY_USER }}
+                containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
             failOnStdErr: false
