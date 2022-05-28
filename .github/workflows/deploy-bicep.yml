@@ -54,6 +54,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
       - name: test
         run: |
             pwd
