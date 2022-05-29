@@ -77,7 +77,7 @@ jobs:
                 environmentName=${{ secrets.ENVIRONMENT_NAME }}
                 containerImage=${{ needs.build.outputs.container_image }}
                 containerPort=8080
-                containerRegistry=${{ secrets.REPOSITORY_SERVER }}
-                containerRegistryUsername=${{ secrets.REPOSITORY_USERNAME }}
+                containerRegistry=${{ secrets.REGISTRY_SERVER }}
+                containerRegistryUsername=${{ secrets.REGISTRY_USERNAME }}
                 containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
             failOnStdErr: false

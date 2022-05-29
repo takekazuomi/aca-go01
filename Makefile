@@ -1,25 +1,26 @@
-REPOSITORY_USER		?= <OVERWRITE HERE>
-REPOSITORY_SERVER	?= <OVERWRITE HERE>
-REPOSITORY_NAME		?= <OVERWRITE HERE>
+REGISTRY_USER		?= <OVERWRITE HERE>
+REGISTRY_SERVER		?= <OVERWRITE HERE>
+REGISTRY_NAME		?= <OVERWRITE HERE>
 RESOURCE_GROUP		?= <OVERWRITE HERE>
 CONTAINERAPPS_NAME	?= <OVERWRITE HERE>
 ENVIRONMENT_NAME	?= <OVERWRITE HERE>
 SUBSCRIPTION_ID		=  $(shell  az account show --query 'id' -o tsv)
 TENANT_ID		=  $(shell  az account show --query 'tenantId' -o tsv)
+CLIENT_ID		=  $(shell az ad app list --query '[?displayName == `$(SP_NAME)`].appId' -o tsv)
 
 BRANCH_NAME 		?= main
 SP_NAME			?= $(RESOURCE_GROUP)-sp
 
 
 
-export KO_DOCKER_REPO=$(REPOSITORY_SERVER)/$(REPOSITORY_USER)/$(REPOSITORY_NAME)
+export KO_DOCKER_REPO=$(REGISTRY_SERVER)/$(REGISTRY_USER)/$(REGISTRY_NAME)
 export VERSION=$(git rev-parse --short HEAD)
 
 help:			## Show this help.
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
 
 login:			## login github registory
-	echo $${GH_PAT} | docker login ghcr.io -u $(REPOSITORY_USER) --password-stdin
+	echo $${GH_PAT} | docker login ghcr.io -u $(REGISTRY_USER) --password-stdin
 
 build:			## build 
 	ko build .
@@ -31,9 +32,9 @@ create-sp:		## create service principal for GitHub Action
 	&& echo "oid: $${OID}" \
 	&& az rest --method POST --uri "https://graph.microsoft.com/beta/applications/$${OID}/federatedIdentityCredentials" \
 		--body "{ \
-				'name':'$(RESOURCE_GROUP)-$(REPOSITORY_USER)-$(REPOSITORY_NAME)-cred', \
+				'name':'$(RESOURCE_GROUP)-$(REGISTRY_USER)-$(REGISTRY_NAME)-cred', \
 				'issuer':'https://token.actions.githubusercontent.com', \
-				'subject':'repo:$(REPOSITORY_USER)/$(REPOSITORY_NAME):ref:refs/heads/$(BRANCH_NAME)', \
+				'subject':'repo:$(REGISTRY_USER)/$(REGISTRY_NAME):ref:refs/heads/$(BRANCH_NAME)', \
 				'description':'GitHub Actions for $(RESOURCE_GROUP)', \
 				'audiences':['api://AzureADTokenExchange'] \
 			}"
@@ -50,12 +51,12 @@ set-gh-secret: tmp/.env
 	gh secret set -f tmp/.env
 
 tmp/.env:
-	@echo "AZURE_CLIENT_ID=$$(az ad app list --query '[?displayName == `$(SP_NAME)`].appId' -o tsv)" > tmp/.env
+	@echo "AZURE_CLIENT_ID=$(CLIENT_ID)" > tmp/.env
 	@echo "AZURE_TENANT_ID=$(TENANT_ID)" >> tmp/.env
 	@echo "AZURE_SUBSCRIPTION_ID=$(SUBSCRIPTION_ID)" >> tmp/.env
 	@echo "AZURE_RESOUCE_GROUP=$(RESOURCE_GROUP)" >> tmp/.env
-	@echo "REPOSITORY_SERVER=$(REPOSITORY_SERVER)" >> tmp/.env
-	@echo "REGISTRY_USERNAME=$(REPOSITORY_USER)" >> tmp/.env
+	@echo "REGISTRY_SERVER=$(REGISTRY_SERVER)" >> tmp/.env
+	@echo "REGISTRY_USERNAME=$(REGISTRY_USERNAME)" >> tmp/.env
 	@echo "REGISTRY_PASSWORD=${GH_PAT}" >> tmp/.env
 	@echo "ENVIRONMENT_NAME=$(ENVIRONMENT_NAME)" >> tmp/.env
 	@echo "CONTAINERAPPS_NAME=$(CONTAINERAPPS_NAME)" >> tmp/.env
@@ -65,8 +66,8 @@ deploy-apps:		## deploy app
 	-p \
 	containerAppName=$(CONTAINERAPPS_NAME) \
 	environmentName=$(ENVIRONMENT_NAME) \
-	containerRegistry=$(REPOSITORY_SERVER) \
-	containerRegistryUsername=$(REPOSITORY_USER) \
+	containerRegistry=$(REGISTRY_SERVER) \
+	containerRegistryUsername=$(REGISTRY_USER) \
 	containerRegistryPassword=$${GH_PAT} \
 	containerImage=$$(ko build .) \
 	containerPort=8080
