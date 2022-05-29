@@ -13,7 +13,8 @@ SP_NAME			?= $(RESOURCE_GROUP)-sp
 
 export KO_DOCKER_REPO=$(REGISTRY_SERVER)/$(REGISTRY_USERNAME)/$(REGISTRY_NAME)
 #export VERSION=$(git rev-parse --short HEAD)
-export VERSION=$(shell date --iso-8601=seconds)
+#export VERSION=$(shell date --iso-8601=seconds)
+export VERSION=$(shell ./scripts/get-hashortag.sh)
 
 help:			## Show this help.
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
@@ -39,7 +40,8 @@ deploy-apps:		## Deploy container apps
 	containerRegistryUsername=$(REGISTRY_USERNAME) \
 	containerRegistryPassword=$${GH_PAT} \
 	containerImage=$$(ko build .) \
-	containerPort=8080
+	containerPort=8080 \
+	revisionSuffix=$(VERSION)
 
 curl-apps:
 	curl -L $$(az containerapp show -n $(CONTAINERAPPS_NAME) -g  $(RESOURCE_GROUP) --query properties.configuration.ingress.fqdn -o tsv)

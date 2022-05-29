@@ -13,6 +13,7 @@ param containerRegistry string = ''
 param containerRegistryUsername string = ''
 @secure()
 param containerRegistryPassword string = ''
+param revisionSuffix string = ''
 
 module containerApps 'container.bicep' = {
     name: 'containerApps'
@@ -27,9 +28,10 @@ module containerApps 'container.bicep' = {
         transport: transport
         allowInsecure: allowInsecure
         env: env
-        containerRegistry:containerRegistry
-        containerRegistryUsername:containerRegistryUsername
-        containerRegistryPassword:containerRegistryPassword
+        containerRegistry: containerRegistry
+        containerRegistryUsername: containerRegistryUsername
+        containerRegistryPassword: containerRegistryPassword
+        revisionSuffix: revisionSuffix
     }
 }
 
