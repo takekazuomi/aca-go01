@@ -68,7 +68,7 @@ jobs:
                 containerPort=8080
                 containerRegistry=${{ secrets.REGISTRY_SERVER }}
                 containerRegistryUsername=${{ secrets.REGISTRY_USERNAME }}
-                containerRegistryPassword=${{ secrets.GITHUB_TOKEN }}
+                containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
             failOnStdErr: false
             
       - name: Azure CLI logout
