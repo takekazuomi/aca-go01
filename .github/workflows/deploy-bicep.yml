@@ -33,10 +33,10 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
 
       - name: Set version env
-        id: version
         run: echo "VERSION=$(./scripts/get-hashortag.sh)" >> $GITHUB_ENV
       
       - name: Set version output
+        id: version
         run: echo "::set-output name=value::$(./scripts/get-hashortag.sh)"
 
       - name: build
