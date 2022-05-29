@@ -28,8 +28,13 @@ jobs:
           go-version: 1.18
 
       - name: Checkout to the branch
-        uses: actions/checkout@v2
-    
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0            
+
+      - name: debug git 
+        run: log --graph --all
+
       - uses: imjasonh/setup-ko@v0.4
 
       - name: Set version env
