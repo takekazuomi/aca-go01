@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       container_image: ${{ steps.build.outputs.container_image}}
-      version: ${{ steps.build.outputs.version}}
+      version: ${{ steps.version.outputs.value}}
 
     steps:
       - uses: actions/setup-go@v2
@@ -33,10 +33,11 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
 
       - name: Set version env
+        id: version
         run: echo "VERSION=$(./scripts/get-hashortag.sh)" >> $GITHUB_ENV
       
       - name: Set version output
-        run: echo "::set-output name=version::$(./scripts/get-hashortag.sh)"
+        run: echo "::set-output name=value::$(./scripts/get-hashortag.sh)"
 
       - name: build
         id: build
@@ -74,7 +75,7 @@ jobs:
                 containerRegistry=${{ secrets.REGISTRY_SERVER }}
                 containerRegistryUsername=${{ secrets.REGISTRY_USERNAME }}
                 containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
-                revisionSuffix=${{ needs.build.outputs.version }}
+                revisionSuffix=${{ needs.version.outputs.value }}
             failOnStdErr: false
             
       - name: Azure CLI logout
