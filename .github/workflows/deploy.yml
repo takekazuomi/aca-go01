@@ -30,7 +30,7 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
 
       - name: Set version env
-        run: echo "VERSION=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+        run: echo "VERSION=$(./scripts/get-hashortag.sh)" >> $GITHUB_ENV
 
       - name: Build
         id: build
@@ -57,7 +57,7 @@ jobs:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
             az containerapp registry set -n ${{ secrets.CONTAINERAPPS_NAME }} -g ${{ secrets.AZURE_RESOUCE_GROUP }} --server ${{ secrets.REGISTRY_SERVER }} --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }}
-            az containerapp update -n ${{ secrets.CONTAINERAPPS_NAME }} -g ${{ secrets.AZURE_RESOUCE_GROUP }} --image ${{ needs.build.outputs.container_image }}
+            az containerapp update -n ${{ secrets.CONTAINERAPPS_NAME }} -g ${{ secrets.AZURE_RESOUCE_GROUP }} --image ${{ needs.build.outputs.container_image }} --revision-suffix ${{ env.VERSION }}
             az logout
             az cache purge
             az account clear

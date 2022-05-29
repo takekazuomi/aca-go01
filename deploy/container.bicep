@@ -27,6 +27,8 @@ param revisionMode string = 'single'
 ])
 param transport string = 'auto'
 
+param revisionSuffix string = ''
+
 param allowInsecure bool = false
 
 var cpu = json('0.25')
@@ -81,7 +83,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
         }
         template: {
-            // revisionSuffix: 'somevalue'
+            revisionSuffix: revisionSuffix
             containers: [
                 {
                     image: containerImage
