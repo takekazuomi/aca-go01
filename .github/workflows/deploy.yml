@@ -1,4 +1,4 @@
-name: Trigger auto deployment for goweb01
+name: az cli auto deployment for goweb01
 
 # When this action will be executed
 on:
