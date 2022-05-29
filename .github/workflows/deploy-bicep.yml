@@ -7,8 +7,10 @@ on:
     branches: 
       [ main ]
     paths:
-    - '**'
-    - '.github/workflows/deploy-bicep.yml'
+      - '**'
+      - '.github/workflows/deploy-bicep.yml'
+    tags:
+      - v*
 
   # Allow mannually trigger 
   workflow_dispatch:      
