@@ -19,8 +19,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      container_image: ${{ steps.build.outputs.container_image}}
-      version: ${{ steps.version.outputs.value}}
+      container_image: ${{ steps.build.outputs.container_image }}
+      version: ${{ steps.version.outputs.value }}
 
     steps:
       - uses: actions/setup-go@v2
@@ -75,7 +75,7 @@ jobs:
                 containerRegistry=${{ secrets.REGISTRY_SERVER }}
                 containerRegistryUsername=${{ secrets.REGISTRY_USERNAME }}
                 containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
-                revisionSuffix=${{ needs.version.outputs.value }}
+                revisionSuffix=${{ needs.build.outputs.version }}
             failOnStdErr: false
             
       - name: Azure CLI logout
