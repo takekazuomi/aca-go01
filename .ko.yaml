@@ -3,4 +3,4 @@ builds:
   ldflags:
   - -s -w
   - -extldflags "-static"
-  - -X main.build={{.Env.VERSION}}
+  - -X main.build="{{.Env.VERSION}}"

@@ -41,6 +41,9 @@ deploy-apps:		## Deploy container apps
 	containerImage=$$(ko build .) \
 	containerPort=8080
 
+curl-apps:
+	curl -L $$(az containerapp show -n $(CONTAINERAPPS_NAME) -g  $(RESOURCE_GROUP) --query properties.configuration.ingress.fqdn -o tsv)
+
 login:			## Login github registory. first time only
 	echo $${GH_PAT} | docker login ghcr.io -u $(REGISTRY_USERNAME) --password-stdin
 
