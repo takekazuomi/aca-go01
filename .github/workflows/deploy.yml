@@ -16,6 +16,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      container_image: ${{ steps.build.outputs.container_image}}
 
     steps:
       - uses: actions/setup-go@v2
@@ -27,20 +29,12 @@ jobs:
     
       - uses: imjasonh/setup-ko@v0.4
 
-      - name: Set env
+      - name: Set version env
         run: echo "VERSION=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
-      - name: Test
-        run: echo $VERSION
-
-      - name: build
-        run: ko publish ./ > url.log
-
-      - name: Upload url file
-        uses: actions/upload-artifact@v3
-        with:
-          name: url-log-file
-          path: url.log
+      - name: Build
+        id: build
+        run: echo "::set-output name=container_image::$(ko publish .)"
 
   deploy:
     runs-on: ubuntu-latest
@@ -66,7 +60,6 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            url=$(cat url.log)
             az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp registry set -n goweb01 -g omi31-rg --server ghcr.io --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }}
-            az containerapp update -n goweb01 -g omi31-rg --image ${url}
+            az containerapp registry set -n ${{ secrets.CONTAINERAPPS_NAME }} -g ${{ secrets.AZURE_RESOUCE_GROUP }} -rg --server ${{ secrets.REGISTRY_SERVER }} --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }}
+            az containerapp update -n ${{ secrets.CONTAINERAPPS_NAME }} -g ${{ secrets.AZURE_RESOUCE_GROUP }} -rg --image ${{ needs.build.outputs.container_image }}

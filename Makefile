@@ -71,4 +71,3 @@ deploy-apps:		## deploy app
 	containerRegistryPassword=$${GH_PAT} \
 	containerImage=$$(ko build .) \
 	containerPort=8080
-
