@@ -71,7 +71,7 @@ jobs:
                 containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
             failOnStdErr: false
             
-      - name: Azure CLI script
+      - name: Azure CLI logout
         uses: azure/CLI@v1
         with:
           inlineScript: |
