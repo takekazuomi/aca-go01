@@ -1,8 +1,6 @@
 # README
 
-- [x] deploy container apps from GitHub Action
-- [x] use github oidc auth
-- [x] use bicep to deploy
+# How-To 
 
 ## TODO
 
