@@ -9,7 +9,6 @@ import (
 // go run -ldflags "-X main.build=$(git rev-parse --short HEAD)' main.go
 
 var (
-	//go:embed version.txt
 	build string
 )
 

@@ -1,4 +1,4 @@
-REGISTRY_USER		?= <OVERWRITE HERE>
+REGISTRY_USERNAME		?= <OVERWRITE HERE>
 REGISTRY_SERVER		?= <OVERWRITE HERE>
 REGISTRY_NAME		?= <OVERWRITE HERE>
 RESOURCE_GROUP		?= <OVERWRITE HERE>
@@ -13,17 +13,22 @@ SP_NAME			?= $(RESOURCE_GROUP)-sp
 
 
 
-export KO_DOCKER_REPO=$(REGISTRY_SERVER)/$(REGISTRY_USER)/$(REGISTRY_NAME)
-export VERSION=$(git rev-parse --short HEAD)
+export KO_DOCKER_REPO=$(REGISTRY_SERVER)/$(REGISTRY_USERNAME)/$(REGISTRY_NAME)
+#export VERSION=$(git rev-parse --short HEAD)
+export VERSION=$(shell date --iso-8601=seconds)
 
 help:			## Show this help.
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
 
 login:			## login github registory
-	echo $${GH_PAT} | docker login ghcr.io -u $(REGISTRY_USER) --password-stdin
+	echo $${GH_PAT} | docker login ghcr.io -u $(REGISTRY_USERNAME) --password-stdin
 
 build:			## build 
 	ko build .
+
+up:
+	echo $${VERSION}
+	docker run -it --rm -p 8080:8080 $$(ko build --local .)
 
 create-sp:		## create service principal for GitHub Action 
 	APP_ID=$$(az ad sp create-for-rbac --name "$(RESOURCE_GROUP)-sp" --role contributor --scopes "/subscriptions/$(SUBSCRIPTION_ID)/resourceGroups/$(RESOURCE_GROUP)" --query appId -o tsv) \
@@ -32,9 +37,9 @@ create-sp:		## create service principal for GitHub Action
 	&& echo "oid: $${OID}" \
 	&& az rest --method POST --uri "https://graph.microsoft.com/beta/applications/$${OID}/federatedIdentityCredentials" \
 		--body "{ \
-				'name':'$(RESOURCE_GROUP)-$(REGISTRY_USER)-$(REGISTRY_NAME)-cred', \
+				'name':'$(RESOURCE_GROUP)-$(REGISTRY_USERNAME)-$(REGISTRY_NAME)-cred', \
 				'issuer':'https://token.actions.githubusercontent.com', \
-				'subject':'repo:$(REGISTRY_USER)/$(REGISTRY_NAME):ref:refs/heads/$(BRANCH_NAME)', \
+				'subject':'repo:$(REGISTRY_USERNAME)/$(REGISTRY_NAME):ref:refs/heads/$(BRANCH_NAME)', \
 				'description':'GitHub Actions for $(RESOURCE_GROUP)', \
 				'audiences':['api://AzureADTokenExchange'] \
 			}"
@@ -67,7 +72,7 @@ deploy-apps:		## deploy app
 	containerAppName=$(CONTAINERAPPS_NAME) \
 	environmentName=$(ENVIRONMENT_NAME) \
 	containerRegistry=$(REGISTRY_SERVER) \
-	containerRegistryUsername=$(REGISTRY_USER) \
+	containerRegistryUsername=$(REGISTRY_USERNAME) \
 	containerRegistryPassword=$${GH_PAT} \
 	containerImage=$$(ko build .) \
 	containerPort=8080

@@ -30,7 +30,8 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
 
       - name: Set env
-        run: echo "VERSION=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+#        run: echo "VERSION=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+        run: echo "VERSION=$(date --iso-8601=seconds | cut -c 1-6)" >> $GITHUB_ENV
 
       - name: build
         id: build
@@ -69,3 +70,11 @@ jobs:
                 containerRegistryUsername=${{ secrets.REGISTRY_USERNAME }}
                 containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
             failOnStdErr: false
+            
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az logout
+            az cache purge
+            az account clear
