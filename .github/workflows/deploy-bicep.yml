@@ -4,11 +4,11 @@ name: bicep auto deployment for goweb01
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ main ]
-    paths:
-      - '**'
-      - '.github/workflows/deploy-bicep.yml'
+    # branches: 
+    #   [ main ]
+    # paths:
+    #   - '**'
+    #   - '.github/workflows/deploy-bicep.yml'
     tags:
       - v*
 
