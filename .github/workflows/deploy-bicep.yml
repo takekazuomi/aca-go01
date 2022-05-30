@@ -33,7 +33,7 @@ jobs:
             fetch-depth: 0            
 
       - name: debug git log
-        run: log --graph --all
+        run: git log --graph --all
 
       - uses: imjasonh/setup-ko@v0.4
 
